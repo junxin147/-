@@ -65,7 +65,7 @@ public class LogAspect
 //		将参数所在的数组转换成json
 //		获取方法返回值
 //		Object returnValue = joinPoint.proceed(args);
-
+   
 		//获取session
 		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpSession session = attr.getRequest().getSession(true);

@@ -7,6 +7,7 @@ package com.cy.tpes.controller.hwxcontroller;
  **/
 
 import com.alibaba.fastjson.JSON;
+import com.cy.tpes.controller.hjx.SpringbootEmail;
 import com.cy.tpes.entity.hwxbean.*;
 import com.cy.tpes.service.hwxservice.CommonService;
 import com.cy.tpes.util.harmon.EmailUtil;
@@ -27,7 +28,8 @@ import java.util.*;
 public class CommonController {
     @Autowired
     private CommonService commonService;
-
+   @Autowired
+   private SpringbootEmail springbootEmail;
 
     //登录:根据账号查找密码，找到的md5密码和输入的密码加密后进行对比，再查询这个权限的用户的菜单再根据权限跳转到不同的界面
     @RequestMapping(path = "/dologin")
@@ -99,8 +101,13 @@ public class CommonController {
 //					ArrayList<Menu> stu = it3.next();
 //					System.out.println("stu :"+stu);
 //				}
+                String loginIp = EmailUtil.getRemoteIp(request);
+                String msg = "温馨提示:您的账户 " + worker.getWaccount() + " 于 " + new Date().toLocaleString() + " 在IP: " + loginIp + " 登录!(tips:IP: 0:0:0:0:0:0:0:1为测试/服务器一体时特殊IPV6现象)";
                 //登录邮箱提示功能
-                sendEmailWithLoginInfo(request, worker);
+                springbootEmail.sendMail("shmdmw@163.com","xq672174@yeah.net"
+            ,"团检后台登录信息提示 "+new Date().toLocaleString(),  msg  );
+
+//                sendEmailWithLoginInfo(request, worker);
 
             } else {
                 //登录失败
@@ -240,7 +247,7 @@ public class CommonController {
     private void sendEmailWithLoginInfo(HttpServletRequest request, Worker worker) {
         String loginIp = EmailUtil.getRemoteIp(request);
         String msg = "温馨提示:您的账户 " + worker.getWaccount() + " 于 " + new Date().toLocaleString() + " 在IP: " + loginIp + " 登录!(tips:IP: 0:0:0:0:0:0:0:1为测试/服务器一体时特殊IPV6现象)";
-        boolean b = EmailUtil.sendEmail("253690271@qq.com", msg);
+        boolean b = EmailUtil.sendEmail("xq672174@yeah.net", msg);
         System.out.println("发送情况 + " + b);
         System.out.println(msg);
     }
