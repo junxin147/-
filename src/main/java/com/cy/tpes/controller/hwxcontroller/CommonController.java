@@ -8,34 +8,48 @@ package com.cy.tpes.controller.hwxcontroller;
 
 import com.alibaba.fastjson.JSON;
 import com.cy.tpes.controller.hjx.SpringbootEmail;
-import com.cy.tpes.entity.hwxbean.*;
+import com.cy.tpes.entity.hwxbean.Menu;
+import com.cy.tpes.entity.hwxbean.Worker;
 import com.cy.tpes.service.hwxservice.CommonService;
 import com.cy.tpes.util.harmon.EmailUtil;
+import com.wf.captcha.utils.CaptchaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 通用功能控制器
- *
  */
 
 @Controller
 public class CommonController {
     @Autowired
     private CommonService commonService;
-   @Autowired
-   private SpringbootEmail springbootEmail;
+    @Autowired
+    private SpringbootEmail springbootEmail;
 
     //登录:根据账号查找密码，找到的md5密码和输入的密码加密后进行对比，再查询这个权限的用户的菜单再根据权限跳转到不同的界面
     @RequestMapping(path = "/dologin")
     @ResponseBody
     public String login(HttpServletRequest request) {
         String str = "";
+        String verCode = request.getParameter("mycode");
+        if (!CaptchaUtil.ver(verCode, request)) {
+            CaptchaUtil.clear(request);  // 清除session中的验证码
+            return "errorcode";
+        }
+
+
         //获取账号
         String account = request.getParameter("login_account");
         //获取密码
@@ -104,8 +118,8 @@ public class CommonController {
                 String loginIp = EmailUtil.getRemoteIp(request);
                 String msg = "温馨提示:您的账户 " + worker.getWaccount() + " 于 " + new Date().toLocaleString() + " 在IP: " + loginIp + " 登录!(tips:IP: 0:0:0:0:0:0:0:1为测试/服务器一体时特殊IPV6现象)";
                 //登录邮箱提示功能
-                springbootEmail.sendMail("shmdmw@163.com","xq672174@yeah.net"
-            ,"团检后台登录信息提示 "+new Date().toLocaleString(),  msg  );
+                springbootEmail.sendMail("shmdmw@163.com", "xq672174@yeah.net"
+                        , "团检后台登录信息提示 " + new Date().toLocaleString(), msg);
 
 //                sendEmailWithLoginInfo(request, worker);
 
@@ -142,10 +156,12 @@ public class CommonController {
     //修改密码，输入账号，输入密码，输入新密码 旧密码加密验证是否与数据库相同，相同的话 将新密码加密后存到数据库中
 
     //后台主页
-    @RequestMapping(path = "/back/")
-    public String backindex(HttpServletRequest request) {
+    @RequestMapping(path = "/back")
+    public String backindex(HttpServletRequest request, HttpServletResponse response) throws IOException, FontFormatException {
         //		request.setAttribute("list",testService.test());
         //		return "index";
+
+
         //清空session
         request.getSession().invalidate();
         return "hwx_backlogin";
@@ -242,8 +258,7 @@ public class CommonController {
     }
 
 
-
-        //登录邮箱提示功能
+    //登录邮箱提示功能
     private void sendEmailWithLoginInfo(HttpServletRequest request, Worker worker) {
         String loginIp = EmailUtil.getRemoteIp(request);
         String msg = "温馨提示:您的账户 " + worker.getWaccount() + " 于 " + new Date().toLocaleString() + " 在IP: " + loginIp + " 登录!(tips:IP: 0:0:0:0:0:0:0:1为测试/服务器一体时特殊IPV6现象)";
